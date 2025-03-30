@@ -1,0 +1,59 @@
+/* Reset and base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Import variables - now handled by App.vue */
+/* Keeping some backward compatibility for older components */
+:root {
+  --primary-color: #333333;       /* Black - matches our new theme */
+  --secondary-color: #666666;     /* Medium grey */
+  --accent-color: #8a7a60;        /* Accent color that complements our cream/grey theme */
+  --background-color: #f8f5f1;    /* Cream background */
+  --text-color: #333333;          /* Dark grey/black text */
+  --light-gray: #fafafa;          /* Very light grey */
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  line-height: 1.6;
+  color: var(--color-text-primary, var(--text-color));
+  background-color: var(--color-bg-primary, var(--background-color));
+}
+
+/* Global styles */
+a {
+  color: var(--color-text-primary, var(--primary-color));
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: var(--color-text-secondary, var(--secondary-color));
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.8rem 1.5rem;
+  background-color: var(--color-bg-accent, var(--primary-color));
+  color: var(--color-text-on-dark, white);
+  border: none;
+  border-radius: var(--radius-sm, 4px);
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  font-weight: 500;
+}
+
+.btn:hover {
+  background-color: #444444;
+  transform: translateY(-2px);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+} 
