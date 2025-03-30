@@ -6,7 +6,7 @@
       <div class="about-content">
         <div class="image-section">
           <div class="image-container">
-            <img src="../assets/about-jewelry.jpg" alt="Elegant jewelry" onerror="this.src='https://images.unsplash.com/photo-1584302179602-e4c3d3fd629d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80'">
+            <img src="https://images.unsplash.com/photo-1584302179602-e4c3d3fd629d?auto=format&fit=crop&w=1000&q=80" alt="Elegant jewelry">
           </div>
         </div>
         
@@ -22,7 +22,7 @@
       <div class="about-content1">
         <div class="image-section">
           <div class="image-container">
-            <img src="../assets/about-jewelry.jpg" alt="Elegant jewelry" onerror="this.src='https://images.unsplash.com/photo-1584302179602-e4c3d3fd629d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80'">
+            <img src="https://images.unsplash.com/photo-1584302179602-e4c3d3fd629d?auto=format&fit=crop&w=1000&q=80" alt="Elegant jewelry">
           </div>
         </div>
         
