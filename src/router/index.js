@@ -142,6 +142,8 @@ router.beforeEach(async (to, from, next) => {
   const requiresAuth = to.meta.requiresAuth;
   const requiresAdmin = to.meta.requiresAdmin;
 
+  console.log('Navigation Guard Debug:', { to: to.path, isLoggedIn, requiresAuth, requiresAdmin });
+
   if ((to.path === '/login' || to.path === '/register') && isLoggedIn) {
     return next('/collection');
   } else if (requiresAuth && !isLoggedIn) {
