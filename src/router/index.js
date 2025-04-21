@@ -114,11 +114,6 @@ const router = createRouter({
           component: () => import('../views/admin/Users.vue')
         },
         {
-          path: 'user-profiles',
-          name: 'admin-user-profiles',
-          component: () => import('../views/admin/UserProfiles.vue')
-        },
-        {
           path: 'upload-test',
           name: 'admin-upload-test',
           component: () => import('../views/admin/UploadTest.vue')
@@ -141,8 +136,6 @@ router.beforeEach(async (to, from, next) => {
   const isLoggedIn = !!session?.user;
   const requiresAuth = to.meta.requiresAuth;
   const requiresAdmin = to.meta.requiresAdmin;
-
-  console.log('Navigation Guard Debug:', { to: to.path, isLoggedIn, requiresAuth, requiresAdmin });
 
   if ((to.path === '/login' || to.path === '/register') && isLoggedIn) {
     return next('/collection');
