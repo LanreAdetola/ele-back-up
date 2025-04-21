@@ -28,38 +28,31 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { supabase } from '../../lib/supabase'
+import { ref, onMounted } from 'vue';
+import { supabase } from '../../lib/supabase';
 
-const users = ref([])
+const users = ref([]);
 
 const fetchUsers = async () => {
-  const { data, error } = await supabase
-    .from('user_roles')
-    .select('user_id, role, created_at, auth:users(email)')
+  try {
+    const { data, error } = await supabase
+      .from('user_roles')
+      .select('user_id, role, created_at, auth:users(email)');
 
-  if (error) return console.error(error)
+    if (error) throw error;
 
-  users.value = data.map(u => ({
-    id: u.user_id,
-    email: u.auth.email,
-    role: u.role,
-    created_at: u.created_at
-  }))
-}
+    users.value = data.map(u => ({
+      id: u.user_id,
+      email: u.auth.email,
+      role: u.role,
+      created_at: u.created_at,
+    }));
+  } catch (error) {
+    console.error('Error fetching users:', error);
+  }
+};
 
-const changeRole = async (userId) => {
-  const { error } = await supabase
-    .from('user_roles')
-    .update({ role: 'admin' })
-    .eq('user_id', userId)
-
-  if (!error) fetchUsers()
-}
-
-onMounted(() => {
-  fetchUsers()
-})
+onMounted(fetchUsers);
 </script>
 
 <style scoped>

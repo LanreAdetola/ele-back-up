@@ -246,234 +246,35 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
-import { supabase } from '../../lib/supabase'
+import { ref, onMounted } from 'vue';
+import { supabase } from '../../lib/supabase';
 
-const orders = ref([])
-const loading = ref(true)
-const error = ref(null)
-const statusFilter = ref('')
-const dateFilter = ref('all')
-const searchQuery = ref('')
-const selectedOrder = ref(null)
-const orderItems = ref([])
-const updatingOrderId = ref(null)
-const currentPage = ref(1)
-const itemsPerPage = 10
+const orders = ref([]);
+const statusFilter = ref('');
+const dateFilter = ref('all');
+const searchQuery = ref('');
+const loading = ref(false);
+const error = ref(null);
 
-// Fetch all orders
 const fetchOrders = async () => {
-  loading.value = true
-  error.value = null
-  
+  loading.value = true;
+  error.value = null;
+
   try {
     const { data, error: fetchError } = await supabase
       .from('orders')
-      .select('*, order_items(*)')
-      .order('created_at', { ascending: false })
-    
-    if (fetchError) throw fetchError
-    
-    // Fetch customer information for each order
-    const ordersWithCustomers = await Promise.all(data.map(async (order) => {
-      // Try to get customer name from user profile if not in shipping address
-      if (!order.shipping_address || !order.shipping_address.name) {
-        try {
-          const { data: userData } = await supabase
-            .from('profiles')
-            .select('full_name')
-            .eq('id', order.user_id)
-            .single()
-          
-          if (userData && userData.full_name) {
-            order.customer = userData.full_name
-          }
-        } catch (err) {
-          console.error('Error fetching user data:', err)
-        }
-      }
-      return order
-    }))
-    
-    orders.value = ordersWithCustomers
+      .select('*');
+
+    if (fetchError) throw fetchError;
+    orders.value = data;
   } catch (err) {
-    console.error('Error fetching orders:', err)
-    error.value = 'Could not load orders. Please try again.'
+    error.value = err.message;
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
-// Filter orders based on selected filters
-const filteredOrders = computed(() => {
-  let result = orders.value
-
-  // Filter by status
-  if (statusFilter.value) {
-    result = result.filter(order => order.status.toLowerCase() === statusFilter.value.toLowerCase())
-  }
-  
-  // Filter by date
-  if (dateFilter.value !== 'all') {
-    const now = new Date()
-    let dateLimit
-    
-    switch (dateFilter.value) {
-      case 'today':
-        dateLimit = new Date(now.setHours(0, 0, 0, 0))
-        break
-      case 'yesterday':
-        dateLimit = new Date(now.setDate(now.getDate() - 1))
-        dateLimit.setHours(0, 0, 0, 0)
-        break
-      case 'week':
-        dateLimit = new Date(now.setDate(now.getDate() - 7))
-        break
-      case 'month':
-        dateLimit = new Date(now.setDate(now.getDate() - 30))
-        break
-    }
-    
-    result = result.filter(order => new Date(order.created_at) >= dateLimit)
-  }
-  
-  // Filter by search query
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    result = result.filter(order => {
-      // Search by order ID
-      if (order.id.toLowerCase().includes(query)) return true
-      
-      // Search by customer name
-      if (order.customer && order.customer.toLowerCase().includes(query)) return true
-      
-      // Search by shipping address name
-      if (order.shipping_address && order.shipping_address.name && 
-          order.shipping_address.name.toLowerCase().includes(query)) return true
-      
-      // Search by order items
-      if (order.order_items && order.order_items.some(item => 
-          item.name.toLowerCase().includes(query))) return true
-      
-      return false
-    })
-  }
-  
-  return result
-})
-
-// Pagination
-const totalPages = computed(() => {
-  return Math.ceil(filteredOrders.value.length / itemsPerPage)
-})
-
-const paginatedOrders = computed(() => {
-  const startIndex = (currentPage.value - 1) * itemsPerPage
-  const endIndex = startIndex + itemsPerPage
-  return filteredOrders.value.slice(startIndex, endIndex)
-})
-
-// Reset pagination when filters change
-watch([statusFilter, dateFilter, searchQuery], () => {
-  currentPage.value = 1
-})
-
-// Format order ID (take just first 8 characters)
-const formatOrderId = (id) => {
-  return id.substring(0, 8)
-}
-
-// Format date
-const formatDate = (dateString) => {
-  if (!dateString) return ''
-  
-  const date = new Date(dateString)
-  return new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  }).format(date)
-}
-
-// Get items count for an order
-const getItemsCount = (order) => {
-  if (!order.order_items) return 0
-  
-  const totalItems = order.order_items.reduce((sum, item) => sum + item.quantity, 0)
-  return `${totalItems} ${totalItems === 1 ? 'item' : 'items'}`
-}
-
-// Clear all filters
-const clearFilters = () => {
-  statusFilter.value = ''
-  dateFilter.value = 'all'
-  searchQuery.value = ''
-}
-
-// Search orders
-const searchOrders = () => {
-  currentPage.value = 1
-}
-
-// View order details
-const viewOrder = (order) => {
-  selectedOrder.value = { ...order }
-  orderItems.value = order.order_items || []
-}
-
-// Close order details modal
-const closeOrderDetails = () => {
-  selectedOrder.value = null
-  orderItems.value = []
-}
-
-// Calculate subtotal for an order
-const calculateSubtotal = () => {
-  if (!orderItems.value || orderItems.value.length === 0) return 0
-  
-  return orderItems.value.reduce((sum, item) => {
-    return sum + (Number(item.price) * item.quantity)
-  }, 0)
-}
-
-// Update order status
-const updateOrderStatus = async (order) => {
-  updatingOrderId.value = order.id
-  
-  try {
-    const { error: updateError } = await supabase
-      .from('orders')
-      .update({ 
-        status: order.status,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', order.id)
-    
-    if (updateError) throw updateError
-    
-    // Update the order in the list
-    const index = orders.value.findIndex(o => o.id === order.id)
-    if (index !== -1) {
-      orders.value[index].status = order.status
-    }
-  } catch (err) {
-    console.error('Error updating order status:', err)
-    alert('Could not update order status. Please try again.')
-  } finally {
-    updatingOrderId.value = null
-  }
-}
-
-// Print order details
-const printOrder = () => {
-  window.print()
-}
-
-onMounted(() => {
-  fetchOrders()
-})
+onMounted(fetchOrders);
 </script>
 
 <style scoped>

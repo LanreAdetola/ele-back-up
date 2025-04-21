@@ -46,58 +46,44 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { supabase } from '../../lib/supabase'
+import { ref, onMounted } from 'vue';
+import { supabase } from '../../lib/supabase';
 
-const router = useRouter()
 const stats = ref({
   totalProducts: 0,
   totalOrders: 0,
   totalUsers: 0,
-  revenue: 0
-})
+  revenue: 0,
+});
 
 const fetchStats = async () => {
   try {
-    // Fetch products count
     const { count: productsCount } = await supabase
       .from('products')
-      .select('*', { count: 'exact', head: true })
+      .select('*', { count: 'exact', head: true });
 
-    // Fetch orders count and total revenue
     const { data: ordersData } = await supabase
       .from('orders')
-      .select('total_amount')
+      .select('total_amount');
 
-    // Fetch users count
     const { count: usersCount } = await supabase
-      .from('users')
-      .select('*', { count: 'exact', head: true })
+      .from('auth.users')
+      .select('*', { count: 'exact', head: true });
 
     stats.value = {
       totalProducts: productsCount || 0,
       totalOrders: ordersData?.length || 0,
       totalUsers: usersCount || 0,
-      revenue: ordersData?.reduce((sum, order) => sum + order.total_amount, 0) || 0
-    }
+      revenue: ordersData?.reduce((sum, order) => sum + order.total_amount, 0) || 0,
+    };
   } catch (error) {
-    console.error('Error fetching stats:', error)
+    console.error('Error fetching stats:', error);
   }
-}
-
-const handleLogout = async () => {
-  try {
-    await supabase.auth.signOut()
-    router.push('/login')
-  } catch (error) {
-    console.error('Error logging out:', error)
-  }
-}
+};
 
 onMounted(() => {
-  fetchStats()
-})
+  fetchStats();
+});
 </script>
 
 <style scoped>
@@ -207,4 +193,4 @@ onMounted(() => {
     grid-template-columns: 1fr;
   }
 }
-</style> 
+</style>

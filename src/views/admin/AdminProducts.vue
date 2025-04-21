@@ -120,148 +120,39 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { supabase } from '../../lib/supabase'
-import { useImageUploader } from '../../composables/useImageUploader'
+import { ref, computed, onMounted } from 'vue';
+import { supabase } from '../../lib/supabase';
 
-const { uploadImage, deleteImage, uploading, progress } = useImageUploader()
-const fileInput = ref(null)
-
-const products = ref([])
-const categories = ref(['Rings', 'Necklaces', 'Earrings', 'Bracelets'])
-const searchQuery = ref('')
-const categoryFilter = ref('')
-const stockFilter = ref('')
-
-const showAddModal = ref(false)
-const showEditModal = ref(false)
-
-const productForm = ref({
-  id: null,                // ✅ you need this for edit mode
-  name: '',
-  description: '',
-  price: 0,
-  category: '',
-  image_url: '',            // ✅ correct naming for final image url
-  in_stock: true
-})
-
-const errorMessage = ref(null)
-
-const triggerFileInput = () => {
-  if (!uploading.value) fileInput.value?.click()
-}
+const products = ref([]);
+const categories = ref(['Rings', 'Necklaces', 'Earrings', 'Bracelets']);
+const searchQuery = ref('');
+const categoryFilter = ref('');
+const stockFilter = ref('');
 
 const fetchProducts = async () => {
-  const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false })
-  if (!error) products.value = data
-}
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    products.value = data;
+  } catch (error) {
+    console.error('Error fetching products:', error);
+  }
+};
 
 const filteredProducts = computed(() => {
   return products.value.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchQuery.value.toLowerCase())
-    const matchesCategory = !categoryFilter.value || product.category === categoryFilter.value
-    const matchesStock = !stockFilter.value || (stockFilter.value === 'in_stock' && product.in_stock) || (stockFilter.value === 'out_of_stock' && !product.in_stock)
-    return matchesSearch && matchesCategory && matchesStock
-  })
-})
+    const matchesSearch = product.name.toLowerCase().includes(searchQuery.value.toLowerCase());
+    const matchesCategory = !categoryFilter.value || product.category === categoryFilter.value;
+    const matchesStock = !stockFilter.value || (stockFilter.value === 'in_stock' && product.in_stock) || (stockFilter.value === 'out_of_stock' && !product.in_stock);
+    return matchesSearch && matchesCategory && matchesStock;
+  });
+});
 
-const handleImageUpload = async (e) => {
-  const file = e.target.files[0]
-  if (!file || uploading.value) return
-
-  // Clear any previous errors
-  errorMessage.value = null
-
-  try {
-    // If we're editing and there's an existing image, delete it
-    if (showEditModal.value && productForm.value.image_url) {
-      await deleteImage(productForm.value.image_url)
-    }
-
-    // Upload the new image
-    const url = await uploadImage(file)
-    if (url) {
-      productForm.value.image_url = url
-      productForm.value.image = url // For preview
-      console.log("Image uploaded successfully:", url)
-    } else {
-      console.error("Upload failed - no URL returned")
-      errorMessage.value = "Image upload failed"
-    }
-  } catch (error) {
-    console.error("Image upload error:", error)
-    errorMessage.value = `Error uploading image: ${error.message}`
-  }
-}
-
-const editProduct = (product) => {
-  productForm.value = { ...product }
-  showEditModal.value = true
-}
-
-const deleteProduct = async (id) => {
-  if (confirm('Delete this product?')) {
-    await supabase.from('products').delete().eq('id', id)
-    await fetchProducts()
-  }
-}
-
-const handleSubmit = async () => {
-  if (uploading.value) {
-    alert('Please wait for the image to finish uploading.')
-    return
-  }
-
-  try {
-    errorMessage.value = null
-
-    // Make sure we have an image for new products
-    if (!showEditModal.value && !productForm.value.image_url) {
-      errorMessage.value = "Please upload an image"
-      return
-    }
-
-    const data = {
-      name: productForm.value.name,
-      description: productForm.value.description,
-      price: parseFloat(productForm.value.price),
-      category: productForm.value.category,
-      image_url: productForm.value.image_url,
-      in_stock: productForm.value.in_stock
-    }
-
-    if (showEditModal.value) {
-      const { error } = await supabase.from('products').update(data).eq('id', productForm.value.id)
-      if (error) throw error
-    } else {
-      const { error } = await supabase.from('products').insert(data)
-      if (error) throw error
-    }
-
-    closeModal()
-    await fetchProducts()
-  } catch (error) {
-    console.error("Error saving product:", error)
-    errorMessage.value = `Error saving product: ${error.message}`
-  }
-}
-
-const closeModal = () => {
-  showAddModal.value = false
-  showEditModal.value = false
-  productForm.value = {
-    id: null,
-    name: '',
-    description: '',
-    price: 0,
-    category: '',
-    image_url: '',
-    in_stock: true
-  }
-}
-
-onMounted(fetchProducts)
+onMounted(fetchProducts);
 </script>
 
 <style scoped>

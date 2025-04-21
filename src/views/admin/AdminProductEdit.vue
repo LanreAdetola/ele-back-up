@@ -57,83 +57,53 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { supabase } from '../../lib/supabase'
-import { useImageUploader } from '../../composables/useImageUploader'
+import { ref, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { supabase } from '../../lib/supabase';
+import { useImageUploader } from '../../composables/useImageUploader';
 
-const { uploadImage, deleteImage, uploading, progress } = useImageUploader()
-const route = useRoute()
-const router = useRouter()
-const product = ref({})
-const fileInput = ref(null)
-const errorMessage = ref(null)
+const { uploadImage, deleteImage, uploading, progress } = useImageUploader();
+const route = useRoute();
+const router = useRouter();
+const product = ref({});
+const errorMessage = ref(null);
 
 const fetchProduct = async () => {
-  const { data, error } = await supabase
-    .from('products')
-    .select('*')
-    .eq('id', route.params.id)
-    .single()
-
-  if (error) return console.error(error)
-  product.value = data
-}
-
-const triggerFileInput = () => {
-  if (!uploading.value) fileInput.value?.click()
-}
-
-const handleImageUpload = async (e) => {
-  const file = e.target.files[0]
-  if (!file || uploading.value) return
-
-  errorMessage.value = null
-
   try {
-    // Optional: delete old image
-    if (product.value.image_url) await deleteImage(product.value.image_url)
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('id', route.params.id)
+      .single();
 
-    const url = await uploadImage(file)
-    if (url) {
-      product.value.image_url = url
-      console.log("Image uploaded successfully:", url)
-    } else {
-      console.error("Upload failed - no URL returned")
-      errorMessage.value = "Image upload failed"
-    }
+    if (error) throw error;
+    product.value = data;
   } catch (error) {
-    console.error("Image upload error:", error)
-    errorMessage.value = `Error uploading image: ${error.message}`
+    console.error('Error fetching product:', error);
   }
-}
+};
 
 const handleSubmit = async () => {
   if (uploading.value) {
-    alert('Please wait for upload to finish.')
-    return
+    alert('Please wait for upload to finish.');
+    return;
   }
 
   try {
-    errorMessage.value = null
-
     const { error } = await supabase
       .from('products')
       .update(product.value)
-      .eq('id', route.params.id)
+      .eq('id', route.params.id);
 
-    if (error) throw error
-    
-    router.push('/admin/products')
+    if (error) throw error;
+    router.push('/admin/products');
   } catch (error) {
-    console.error("Error saving product:", error)
-    errorMessage.value = `Error saving product: ${error.message}`
+    console.error('Error saving product:', error);
+    errorMessage.value = `Error saving product: ${error.message}`;
   }
-}
+};
 
-onMounted(() => {
-  fetchProduct()
-})
+onMounted(fetchProduct);
 </script>
 
 <style scoped>
