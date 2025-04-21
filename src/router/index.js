@@ -125,33 +125,51 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
-  const { data: { session } } = await supabase.auth.getSession()
-  const isLoggedIn = !!session?.user
-  const requiresAuth = to.meta.requiresAuth
-  const requiresAdmin = to.meta.requiresAdmin
+  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+  if (sessionError) {
+    console.error('Error fetching session:', sessionError);
+    alert('An error occurred. Please try again.');
+    return next('/login');
+  }
+
+  const isLoggedIn = !!session?.user;
+  const requiresAuth = to.meta.requiresAuth;
+  const requiresAdmin = to.meta.requiresAdmin;
 
   if ((to.path === '/login' || to.path === '/register') && isLoggedIn) {
-    next('/collection')
+    return next('/collection');
   } else if (requiresAuth && !isLoggedIn) {
-    next('/login')
+    return next('/login');
   } else if (requiresAdmin) {
-    const { data, error } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', session?.user?.id)
-      .single()
+    try {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', session?.user?.id)
+        .single();
 
-    if (error || !data || data.role !== 'admin') {
-      alert('Access denied. Admins only.')
-      next('/collection')
-    } else {
-      next()
+      if (error) {
+        console.error('Error fetching user role:', error);
+        alert('An error occurred while checking permissions.');
+        return next('/');
+      }
+
+      if (!data || data.role !== 'admin') {
+        console.warn('Access denied. User is not an admin:', data);
+        alert('Access denied. Admins only.');
+        return next('/');
+      }
+
+      return next();
+    } catch (err) {
+      console.error('Unexpected error during role check:', err);
+      alert('An unexpected error occurred. Please try again.');
+      return next('/');
     }
   } else {
-    next()
+    return next();
   }
-})
-
-
+});
 
 export default router
