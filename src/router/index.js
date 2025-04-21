@@ -149,9 +149,11 @@ router.beforeEach(async (to, from, next) => {
         .eq('user_id', session?.user?.id)
         .single();
 
+      console.log('Supabase Query Result:', { data, error }); // Debug log
+
       if (error) {
         console.error('Error fetching user role:', error);
-        alert('An error occurred while checking permissions.');
+        alert('An error occurred while checking permissions. Please contact support.');
         return next('/');
       }
 
@@ -164,7 +166,7 @@ router.beforeEach(async (to, from, next) => {
       return next();
     } catch (err) {
       console.error('Unexpected error during role check:', err);
-      alert('An unexpected error occurred. Please try again.');
+      alert('An unexpected error occurred. Please try again later.');
       return next('/');
     }
   } else {
