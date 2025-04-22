@@ -236,7 +236,7 @@ h1::after {
 }
 
 .price::before {
-  content: '$';
+  content: '';
   font-size: 0.85rem;
   vertical-align: top;
   margin-right: 0.1rem;
