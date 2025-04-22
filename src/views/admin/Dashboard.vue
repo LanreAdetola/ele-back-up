@@ -53,8 +53,8 @@ const stats = ref({
   totalProducts: 0,
   totalOrders: 0,
   totalUsers: 0,
-  revenue: 0,
-});
+  revenue: 0
+})
 
 const fetchStats = async () => {
   try {
@@ -79,12 +79,22 @@ const fetchStats = async () => {
   } catch (error) {
     console.error('Error fetching stats:', error);
   }
-};
+}
+
+const handleLogout = async () => {
+  try {
+    await supabase.auth.signOut()
+    router.push('/login')
+  } catch (error) {
+    console.error('Error logging out:', error)
+  }
+}
 
 onMounted(() => {
-  fetchStats();
-});
+  fetchStats()
+})
 </script>
+
 
 <style scoped>
 .admin-dashboard {
