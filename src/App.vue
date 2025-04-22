@@ -10,7 +10,7 @@ const { locale } = useI18n()
 
 // Translations for language selector
 const translations = {
-  welcome: 'Welcome to Elegant Gem',
+  welcome: 'Welcome to The Elegant Gem',
   select: 'Please select your preferred language'
 }
 

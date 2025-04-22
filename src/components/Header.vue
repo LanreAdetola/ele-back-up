@@ -2,7 +2,7 @@
   <header class="header">
     <div class="container">
       <div class="logo">
-        <router-link to="/">Elegant Gem</router-link>
+        <router-link to="/"> The Elegant Gem</router-link>
       </div>
 
       <nav class="nav">

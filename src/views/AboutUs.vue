@@ -6,7 +6,7 @@
       <div class="about-content">
         <div class="image-section">
           <div class="image-container">
-            <img src="https://images.unsplash.com/photo-1584302179602-e4c3d3fd629d?auto=format&fit=crop&w=1000&q=80" alt="Elegant jewelry">
+            <img src="/src/assets/elegant-background.png" alt="Elegant jewelry">
           </div>
         </div>
         
@@ -22,7 +22,7 @@
       <div class="about-content1">
         <div class="image-section">
           <div class="image-container">
-            <img src="https://images.unsplash.com/photo-1584302179602-e4c3d3fd629d?auto=format&fit=crop&w=1000&q=80" alt="Elegant jewelry">
+            <img src="/src/assets/elegant-enyah.jpg" alt="Enyah">
           </div>
         </div>
         
@@ -40,7 +40,7 @@
 .about-page {
   padding: 3rem 0;
   min-height: 100vh;
-  background-color: #f8fafc;
+  background-color: #d2d6de; /* Match footer color */
 }
 
 .container {
@@ -52,11 +52,12 @@
 h1 {
   text-align: center;
   margin-bottom: 3rem;
-  color: #2d3748;
+  color: #0f0f10;
   font-size: 2.5rem;
   font-weight: 700;
   position: relative;
   padding-bottom: 1rem;
+  font-family: 'Playfair Display', serif;
 }
 
 h1::after {
@@ -67,7 +68,7 @@ h1::after {
   transform: translateX(-50%);
   width: 80px;
   height: 3px;
-  background: linear-gradient(to right, #3182ce, #4299e1);
+  background: linear-gradient(to right, #63b3ed, #4299e1);
   border-radius: 3px;
 }
 
@@ -75,10 +76,11 @@ h1::after {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 3rem;
-  background: white;
+  background-color: #c6cbd5; /* dark card background */
+  color: #e2e8f0;
   padding: 2.5rem;
   border-radius: 0.75rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
   margin-bottom: 3rem;
 }
 
@@ -89,7 +91,7 @@ h1::after {
 .image-container {
   overflow: hidden;
   border-radius: 0.5rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   height: 100%;
 }
 
@@ -97,36 +99,44 @@ h1::after {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.5s ease;
+  transition: transform 0.5s ease, filter 0.5s ease;
+  filter: brightness(0.95);
 }
 
 .image-container:hover img {
   transform: scale(1.03);
+  filter: brightness(1);
 }
 
 .text-section p {
-  color: #4a5568;
-  line-height: 1.8;
+  color: #090909;
+  line-height: 1.9;
   margin-bottom: 1.5rem;
-  font-size: 1.05rem;
+  font-size: 1.125rem;
+  font-weight: 400;
+  font-family: 'Georgia', 'Times New Roman', serif;
+  letter-spacing: 0.25px;
+  transition: all 0.3s ease-in-out;
 }
 
 .text-section h2 {
-  color: #2d3748;
-  font-size: 1.8rem;
+  color: #090909;
+  font-size: 1.9rem;
+  font-family: 'Playfair Display', serif;
+  font-weight: 600;
   margin-bottom: 1.2rem;
   position: relative;
   padding-bottom: 0.8rem;
 }
 
-.text-section h2:after {
+.text-section h2::after {
   content: '';
   position: absolute;
   bottom: 0;
   left: 0;
   width: 60px;
   height: 2px;
-  background: linear-gradient(to right, #3182ce, #4299e1);
+  background: linear-gradient(to right, #63b3ed, #4299e1);
   border-radius: 2px;
 }
 
@@ -138,19 +148,19 @@ h1::after {
   .about-page {
     padding: 2rem 0;
   }
-  
+
   h1 {
     font-size: 2rem;
     margin-bottom: 2rem;
   }
-  
+
   .about-content, .about-content1, .about-content2 {
     grid-template-columns: 1fr;
     gap: 2rem;
     padding: 1.5rem;
     margin-bottom: 2rem;
   }
-  
+
   .image-container {
     max-height: 350px;
   }
@@ -160,13 +170,13 @@ h1::after {
   .about-content, .about-content1, .about-content2 {
     padding: 1.25rem;
   }
-  
+
   .text-section p {
     font-size: 1rem;
   }
-  
+
   .text-section h2 {
     font-size: 1.5rem;
   }
 }
-</style> 
+</style>

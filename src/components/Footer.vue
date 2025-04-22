@@ -9,7 +9,7 @@
         
         <div class="footer-links">
           <div class="link-group">
-            <h3>Shop</h3>
+            <h3>Store</h3>
             <ul>
               <li><router-link to="/collection">All Products</router-link></li>
             </ul>
@@ -24,10 +24,10 @@
           </div>
           
           <div class="link-group">
-            <h3>Company</h3>
+            <h3>Store</h3>
             <ul>
               <li><router-link to="/about-us">About Us</router-link></li>
-              <li><a href="#">Our Story</a></li>
+              
             </ul>
           </div>
         </div>
@@ -60,11 +60,12 @@ const currentYear = computed(() => new Date().getFullYear())
 
 <style scoped>
 .footer {
-  background-color: #2d3748;
-  color: #e2e8f0;
+  background-color: #111111; /* Match the header */
+  color: #f1f1f1;             /* Light text for contrast */
   padding: 3rem 0 1.5rem;
   margin-top: auto;
 }
+
 
 .container {
   max-width: 1200px;
@@ -83,14 +84,14 @@ const currentYear = computed(() => new Date().getFullYear())
   font-size: 1.8rem;
   font-weight: 700;
   margin: 0 0 0.75rem;
-  background: linear-gradient(to right, #4299e1, #63b3ed);
+  background: linear-gradient(to right, #ffffff, #a0aec0);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .footer-logo .tagline {
-  color: #a0aec0;
+  color: #cbd5e0;
   font-size: 0.95rem;
 }
 
@@ -104,7 +105,7 @@ const currentYear = computed(() => new Date().getFullYear())
   font-size: 1.1rem;
   font-weight: 600;
   margin-bottom: 1.25rem;
-  color: #e2e8f0;
+  color: #edf2f7;
 }
 
 .link-group ul {
@@ -118,7 +119,7 @@ const currentYear = computed(() => new Date().getFullYear())
 }
 
 .link-group ul li a {
-  color: #a0aec0;
+  color: #cbd5e0;
   text-decoration: none;
   transition: color 0.3s ease;
   font-size: 0.95rem;
@@ -132,7 +133,7 @@ const currentYear = computed(() => new Date().getFullYear())
   font-size: 1.1rem;
   font-weight: 600;
   margin-bottom: 1.25rem;
-  color: #e2e8f0;
+  color: #edf2f7;
 }
 
 .social-icons {
@@ -147,14 +148,15 @@ const currentYear = computed(() => new Date().getFullYear())
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background-color: #4a5568;
-  color: #e2e8f0;
+  background-color: #2d3748;
+  color: #edf2f7;
   text-decoration: none;
   transition: all 0.3s ease;
 }
 
 .social-icon:hover {
-  background-color: #3182ce;
+  background-color: #63b3ed;
+  color: #1a202c;
   transform: translateY(-3px);
 }
 
@@ -212,4 +214,4 @@ const currentYear = computed(() => new Date().getFullYear())
     gap: 1.5rem;
   }
 }
-</style> 
+</style>
