@@ -95,7 +95,7 @@
               <small>Uploading... {{ progress }}%</small>
             </div>
 
-            <img v-if="productForm.image" :src="productForm.image" style="max-width:120px;margin-top:5px;" />
+            <img v-if="productForm.image_url" :src="productForm.image_url" style="max-width:120px;margin-top:5px;" />
           </div>
 
           <!-- Add error message display -->
@@ -140,7 +140,7 @@ const productForm = ref({
   description: '',
   price: '',
   category: '',
-  image: '',
+  image_url: '',
   in_stock: true
 });
 
@@ -186,10 +186,19 @@ const handleSubmit = async () => {
   try {
     if (!await checkAdminAccess()) return;
 
+    // Validate price
+    const price = parseFloat(productForm.value.price);
+    if (isNaN(price) || price <= 0) {
+      errorMessage.value = 'Please enter a valid price greater than 0';
+      return;
+    }
+
     const productData = {
       ...productForm.value,
-      price: parseFloat(productForm.value.price)
+      price: price
     };
+
+    console.log('Submitting product data:', productData); // Debug log
 
     if (showEditModal.value) {
       const { error } = await supabase
@@ -197,20 +206,26 @@ const handleSubmit = async () => {
         .update(productData)
         .eq('id', productForm.value.id);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Update error:', error);
+        throw error;
+      }
     } else {
       const { error } = await supabase
         .from('products')
         .insert([productData]);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Insert error:', error);
+        throw error;
+      }
     }
 
     await fetchProducts();
     closeModal();
   } catch (error) {
     console.error('Operation failed:', error);
-    errorMessage.value = error.message;
+    errorMessage.value = error.message || 'Failed to save product. Please try again.';
   }
 };
 
@@ -244,7 +259,7 @@ const closeModal = () => {
     description: '',
     price: '',
     category: '',
-    image: '',
+    image_url: '',
     in_stock: true
   };
   errorMessage.value = '';
@@ -278,7 +293,7 @@ const handleImageUpload = async (event) => {
       .from('products')
       .getPublicUrl(filePath);
 
-    productForm.value.image = publicUrl;
+    productForm.value.image_url = publicUrl;
   } catch (error) {
     console.error('Error uploading image:', error);
     errorMessage.value = 'Failed to upload image. Please try again.';

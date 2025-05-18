@@ -143,30 +143,38 @@ router.beforeEach(async (to, from, next) => {
     return next('/login');
   } else if (requiresAdmin) {
     try {
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', session?.user?.id)
-        .single();
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        console.log('No authenticated user found');
+        return next('/login');
+      }
 
-      console.log('Supabase Query Result:', { data, error }); // Debug log
+      console.log('Checking admin status for user:', user.id);
+      
+      const { data, error } = await supabase
+        .from('admin_users')
+        .select('user_id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      console.log('Admin check result:', { data, error, userId: user.id });
 
       if (error) {
-        console.error('Error fetching user role:', error);
-        alert('An error occurred while checking permissions. Please contact support.');
+        console.error('Error checking admin status:', error);
         return next('/');
       }
 
-      if (!data || data.role !== 'admin') {
-        console.warn('Access denied. User is not an admin:', data);
+      if (!data) {
+        console.log('User is not an admin');
         alert('Access denied. Admins only.');
         return next('/');
       }
 
+      console.log('Admin access granted');
       return next();
     } catch (err) {
-      console.error('Unexpected error during role check:', err);
-      alert('An unexpected error occurred. Please try again later.');
+      console.error('Unexpected error during admin check:', err);
       return next('/');
     }
   } else {
