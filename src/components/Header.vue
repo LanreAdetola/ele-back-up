@@ -2,7 +2,9 @@
   <header class="header">
     <div class="container">
       <div class="logo">
-        <router-link to="/"> The Elegant Gem</router-link>
+        <router-link to="/">
+          <img src="/assets/elegant-background-zLbWJeOe.png" alt="Elegant Gem Logo" class="logo-image">
+        </router-link>
       </div>
 
       <nav class="nav">
@@ -178,27 +180,26 @@ onUnmounted(() => {
   justify-content: space-between;
 }
 
-.logo a {
-  font-size: 1.6rem;
-  font-weight: 700;
-  background: linear-gradient(to right, #2a2a2a, #444444);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-decoration: none;
+.logo {
   display: flex;
   align-items: center;
+}
+
+.logo-image {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+}
+
+.logo a {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
   transition: transform 0.3s ease;
 }
 
 .logo a:hover {
   transform: scale(1.05);
-}
-
-.logo a::before {
-  content: "💎";
-  font-size: 1.4rem;
-  margin-right: 0.5rem;
 }
 
 .nav {
@@ -493,13 +494,8 @@ onUnmounted(() => {
     padding: 0.75rem 1rem;
   }
 
-  .logo a {
-    font-size: 1.3rem;
-  }
-
-  .logo a::before {
-    font-size: 1.2rem;
-    margin-right: 0.4rem;
+  .logo-image {
+    height: 32px;
   }
 
   .nav {
@@ -535,6 +531,10 @@ onUnmounted(() => {
 
   .lang-button {
     padding: 0.5rem;
+  }
+
+  .logo-image {
+    height: 28px;
   }
 }
 </style>
