@@ -122,15 +122,53 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { supabase } from '../../lib/supabase';
+import { useRouter } from 'vue-router';
 
+const router = useRouter();
 const products = ref([]);
 const categories = ref(['Rings', 'Necklaces', 'Earrings', 'Bracelets']);
 const searchQuery = ref('');
 const categoryFilter = ref('');
 const stockFilter = ref('');
+const showAddModal = ref(false);
+const showEditModal = ref(false);
+const uploading = ref(false);
+const progress = ref(0);
+const errorMessage = ref('');
+const productForm = ref({
+  name: '',
+  description: '',
+  price: '',
+  category: '',
+  image: '',
+  in_stock: true
+});
+
+const isAdmin = async () => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return false;
+  
+  const { data, error } = await supabase
+    .from('admin_users')
+    .select('user_id')
+    .eq('user_id', user.id)
+    .single();
+    
+  return !error && data !== null;
+};
+
+const checkAdminAccess = async () => {
+  if (!await isAdmin()) {
+    router.push('/login');
+    return false;
+  }
+  return true;
+};
 
 const fetchProducts = async () => {
   try {
+    if (!await checkAdminAccess()) return;
+
     const { data, error } = await supabase
       .from('products')
       .select('*')
@@ -140,7 +178,117 @@ const fetchProducts = async () => {
     products.value = data;
   } catch (error) {
     console.error('Error fetching products:', error);
+    errorMessage.value = 'Failed to fetch products. Please try again.';
   }
+};
+
+const handleSubmit = async () => {
+  try {
+    if (!await checkAdminAccess()) return;
+
+    const productData = {
+      ...productForm.value,
+      price: parseFloat(productForm.value.price)
+    };
+
+    if (showEditModal.value) {
+      const { error } = await supabase
+        .from('products')
+        .update(productData)
+        .eq('id', productForm.value.id);
+      
+      if (error) throw error;
+    } else {
+      const { error } = await supabase
+        .from('products')
+        .insert([productData]);
+      
+      if (error) throw error;
+    }
+
+    await fetchProducts();
+    closeModal();
+  } catch (error) {
+    console.error('Operation failed:', error);
+    errorMessage.value = error.message;
+  }
+};
+
+const deleteProduct = async (productId) => {
+  try {
+    if (!await checkAdminAccess()) return;
+
+    const { error } = await supabase
+      .from('products')
+      .delete()
+      .eq('id', productId);
+
+    if (error) throw error;
+    await fetchProducts();
+  } catch (error) {
+    console.error('Error deleting product:', error);
+    errorMessage.value = 'Failed to delete product. Please try again.';
+  }
+};
+
+const editProduct = (product) => {
+  productForm.value = { ...product };
+  showEditModal.value = true;
+};
+
+const closeModal = () => {
+  showAddModal.value = false;
+  showEditModal.value = false;
+  productForm.value = {
+    name: '',
+    description: '',
+    price: '',
+    category: '',
+    image: '',
+    in_stock: true
+  };
+  errorMessage.value = '';
+};
+
+const handleImageUpload = async (event) => {
+  try {
+    if (!await checkAdminAccess()) return;
+
+    const file = event.target.files[0];
+    if (!file) return;
+
+    uploading.value = true;
+    progress.value = 0;
+
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random()}.${fileExt}`;
+    const filePath = `products/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('products')
+      .upload(filePath, file, {
+        onUploadProgress: (progressEvent) => {
+          progress.value = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+        }
+      });
+
+    if (uploadError) throw uploadError;
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('products')
+      .getPublicUrl(filePath);
+
+    productForm.value.image = publicUrl;
+  } catch (error) {
+    console.error('Error uploading image:', error);
+    errorMessage.value = 'Failed to upload image. Please try again.';
+  } finally {
+    uploading.value = false;
+  }
+};
+
+const triggerFileInput = () => {
+  document.querySelector('input[type="file"]').click();
 };
 
 const filteredProducts = computed(() => {
@@ -152,7 +300,11 @@ const filteredProducts = computed(() => {
   });
 });
 
-onMounted(fetchProducts);
+onMounted(async () => {
+  if (await checkAdminAccess()) {
+    await fetchProducts();
+  }
+});
 </script>
 
 <style scoped>

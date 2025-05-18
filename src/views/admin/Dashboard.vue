@@ -90,6 +90,33 @@ const handleLogout = async () => {
   }
 }
 
+const isAdmin = async () => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return false;
+  
+  const { data, error } = await supabase
+    .from('admin_users')
+    .select('user_id')
+    .eq('user_id', user.id)
+    .single();
+    
+  return !error && data !== null;
+};
+
+const handleSubmit = async () => {
+  try {
+    if (!await isAdmin()) {
+      throw new Error('Unauthorized: Admin access required');
+    }
+    
+    // Your existing submit logic here
+    
+  } catch (error) {
+    console.error('Operation failed:', error);
+    errorMessage.value = error.message;
+  }
+};
+
 onMounted(() => {
   fetchStats()
 })
