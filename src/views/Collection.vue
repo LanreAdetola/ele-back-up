@@ -3,43 +3,61 @@
     <div class="container">
       <h1>Our Products</h1>
       
-      <!-- Products Grid -->
-      <div class="products-grid">
-        <div 
-          v-for="product in products" 
-          :key="product.id" 
-          class="product-card"
+      <!-- Category Navigation -->
+      <div class="category-nav">
+        <button 
+          v-for="category in categories" 
+          :key="category"
+          @click="selectedCategory = category"
+          :class="['category-btn', { active: selectedCategory === category }]"
         >
-          <div class="product-image" @click="viewProduct(product.id)">
-            <img :src="product.image_url" :alt="product.name">
-            <!-- Status Badges -->
-            <div class="status-badges">
-              <span v-if="isNew(product)" class="badge new-badge">New</span>
+          {{ category }}
+        </button>
+      </div>
+
+      <!-- Products by Category -->
+      <div v-for="category in categories" :key="category" class="category-section">
+        <h2 v-if="selectedCategory === category || selectedCategory === 'All'" class="category-title">
+          {{ category }}
+        </h2>
+        
+        <div v-if="selectedCategory === category || selectedCategory === 'All'" class="products-grid">
+          <div 
+            v-for="product in getProductsByCategory(category)" 
+            :key="product.id" 
+            class="product-card"
+          >
+            <div class="product-image" @click="viewProduct(product.id)">
+              <img :src="product.image_url" :alt="product.name">
+              <!-- Status Badges -->
+              <div class="status-badges">
+                <span v-if="isNew(product)" class="badge new-badge">New</span>
+              </div>
             </div>
-          </div>
-          <div class="product-info">
-            <h3>{{ product.name }}</h3>
-            <p class="price">XAF {{ product.price }}</p>
-            <p class="description">{{ product.description }}</p>
-            
-            <!-- Action Buttons -->
-            <div class="product-actions">
-              <button 
-                class="action-button view-button" 
-                @click="viewProduct(product.id)"
-              >
-                View Details
-              </button>
+            <div class="product-info">
+              <h3>{{ product.name }}</h3>
+              <p class="price">XAF {{ product.price }}</p>
+              <p class="description">{{ product.description }}</p>
               
-              <div class="user-actions">
+              <!-- Action Buttons -->
+              <div class="product-actions">
                 <button 
-                  class="action-button cart-button" 
-                  @click.stop="addToCart(product)"
-                  title="Add to Cart"
-                  :class="{ 'login-required': !isLoggedIn }"
+                  class="action-button view-button" 
+                  @click="viewProduct(product.id)"
                 >
-                  <i class="cart-icon">🛒</i>
+                  View Details
                 </button>
+                
+                <div class="user-actions">
+                  <button 
+                    class="action-button cart-button" 
+                    @click.stop="addToCart(product)"
+                    title="Add to Cart"
+                    :class="{ 'login-required': !isLoggedIn }"
+                  >
+                    <i class="cart-icon">🛒</i>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -60,7 +78,11 @@ const router = useRouter()
 const userStore = useUserStore()
 const cartStore = useCartStore()
 const products = ref([])
+const selectedCategory = ref('All')
 const isLoggedIn = computed(() => !!userStore.user)
+
+// Define categories
+const categories = ['All', 'Rings', 'Necklaces', 'Earrings', 'Bracelets']
 
 // Fetch products from Supabase
 const fetchProducts = async () => {
@@ -75,6 +97,11 @@ const fetchProducts = async () => {
   } catch (error) {
     console.error('Error fetching products:', error)
   }
+}
+
+// Get products by category
+const getProductsByCategory = (category) => {
+  return products.value.filter(product => product.category === category)
 }
 
 // View product details
@@ -364,6 +391,47 @@ h1::after {
   color: #2f855a;
 }
 
+.category-nav {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.category-btn {
+  padding: 0.75rem 1.5rem;
+  border: 2px solid #3182ce;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: #3182ce;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.category-btn:hover {
+  background: #ebf8ff;
+  transform: translateY(-2px);
+}
+
+.category-btn.active {
+  background: #3182ce;
+  color: white;
+}
+
+.category-section {
+  margin-bottom: 3rem;
+}
+
+.category-title {
+  font-size: 1.8rem;
+  color: #2d3748;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e2e8f0;
+}
+
 @media (max-width: 768px) {
   .collection {
     padding: 2rem 0;
@@ -378,6 +446,20 @@ h1::after {
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: 1.5rem;
   }
+
+  .category-nav {
+    gap: 0.5rem;
+  }
+
+  .category-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .category-title {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
 }
 
 @media (max-width: 480px) {
@@ -388,6 +470,15 @@ h1::after {
   
   .product-image {
     height: 200px;
+  }
+
+  .category-nav {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .category-btn {
+    width: 100%;
   }
 }
 </style> 
